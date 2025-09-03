@@ -12,11 +12,39 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({})
+
+  function validateForm() {
+    const errors: { [key: string]: string } = {}
+
+    if (!name.trim()) {
+      errors.name = 'Name is required'
+    } else if (name.length < 2) {
+      errors.name = 'Name must be at least 2 characters'
+    }
+
+    if (!email.trim()) {
+      errors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = 'Invalid email format'
+    }
+
+    if (!password.trim()) {
+      errors.password = 'Password is required'
+    } else if (password.length < 6) {
+      errors.password = 'Password must be at least 6 characters'
+    }
+
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    if (!email || !password || !name) return
+
+    if (!validateForm()) return
+
     setLoading(true)
     try {
       let user
@@ -49,29 +77,53 @@ export default function Login() {
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Name</label>
-                <Input placeholder="Jane Doe" value={name} onChange={e => setName(e.target.value)} />
+                <Input
+                  placeholder="Jane Doe"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                />
+                {fieldErrors.name && (
+                  <p className="text-xs text-red-600">{fieldErrors.name}</p>
+                )}
               </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
-                <Input placeholder="jane@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                <Input
+                  placeholder="jane@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                />
+                {fieldErrors.email && (
+                  <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                )}
               </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Password</label>
-                <Input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
+                {fieldErrors.password && (
+                  <p className="text-xs text-red-600">{fieldErrors.password}</p>
+                )}
               </div>
+
               {error && <div className="text-sm text-red-600">{error}</div>}
+
               <Button
-  disabled={loading}
-  className="w-full bg-black hover:bg-gray-900 text-white rounded-md py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
-  type="submit"
->
-  {loading && (
-    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-  )}
-  {loading ? 'Signing in...' : 'Continue'}
-</Button>
-
-
+                disabled={loading}
+                className="w-full bg-black hover:bg-gray-900 text-white cursor-pointer rounded-md py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                type="submit"
+              >
+                {loading && (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 "></div>
+                )}
+                {loading ? 'Signing in...' : 'Continue'}
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -79,5 +131,3 @@ export default function Login() {
     </div>
   )
 }
-
-
